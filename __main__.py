@@ -33,7 +33,7 @@ team_name = config.require("teamName")
 environment = config.get("environment") or "dev"
 cost_center = config.get("costCenter") or "unassigned"
 spoke_cidr = config.require("spokeCidr")
-create_entra = config.get_bool("createEntraResources") or True
+create_entra = config.get_bool("createEntraResources") or False
 
 # Hub stack reference for peering
 hub_stack_ref_name = config.get("hubStackRef") or "demo/azure-data-hub-network/dev"
