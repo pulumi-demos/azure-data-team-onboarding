@@ -33,6 +33,7 @@ team_name = config.require("teamName")
 environment = config.get("environment") or "dev"
 cost_center = config.get("costCenter") or "unassigned"
 spoke_cidr = config.require("spokeCidr")
+create_entra = config.get_bool("createEntraResources") or True
 
 # Hub stack reference for peering
 hub_stack_ref_name = config.get("hubStackRef") or "demo/azure-data-hub-network/dev"
@@ -82,16 +83,18 @@ workspace = dbw.DatabricksWorkspaceComponent("workspace",
 # Entra ID / App Registration (via published component)
 # =============================================================================
 
-# The TeamEntraComponent encapsulates:
-# - Entra ID Application (app registration)
-# - Service Principal bound to the application
-# - Client secret with configurable rotation
-current_client = azuread.get_client_config()
-identity = entra.TeamEntraComponent("identity",
-    team_name=team_name,
-    environment=environment,
-    owners=[current_client.object_id],
-)
+identity = None
+if create_entra:
+    # The TeamEntraComponent encapsulates:
+    # - Entra ID Application (app registration)
+    # - Service Principal bound to the application
+    # - Client secret with configurable rotation
+    current_client = azuread.get_client_config()
+    identity = entra.TeamEntraComponent("identity",
+        team_name=team_name,
+        environment=environment,
+        owners=[current_client.object_id],
+    )
 
 # =============================================================================
 # Outputs
@@ -111,10 +114,11 @@ export("privateSubnetId", workspace.network_config.apply(lambda nc: nc.private_s
 export("publicSubnetId", workspace.network_config.apply(lambda nc: nc.public_subnet_id))
 
 # Service principal outputs (from component)
-export("servicePrincipalId", identity.service_principal_id)
-export("servicePrincipalClientId", identity.client_id)
-# Note: Password is a secret, access via `pulumi stack output --show-secrets`
-export("servicePrincipalPassword", identity.service_principal_password)
+if identity:
+    export("servicePrincipalId", identity.service_principal_id)
+    export("servicePrincipalClientId", identity.client_id)
+    # Note: Password is a secret, access via `pulumi stack output --show-secrets`
+    export("servicePrincipalPassword", identity.service_principal_password)
 
 # Metadata
 export("teamName", team_name)

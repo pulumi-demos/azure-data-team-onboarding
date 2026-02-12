@@ -33,3 +33,6 @@ template:
     hubStackRef:
       description: Pulumi stack reference for the hub network (org/project/stack)
       default: demo/azure-data-hub-network/dev
+    createEntraResources:
+      description: Create Entra ID resources (app registration, service principal, client secret)
+      default: "true"
