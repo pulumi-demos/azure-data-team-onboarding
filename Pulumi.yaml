@@ -35,4 +35,4 @@ template:
       default: demo/azure-data-hub-network/dev
     createEntraResources:
       description: Create Entra ID resources (app registration, service principal, client secret)
-      default: "False"
+      default: False
